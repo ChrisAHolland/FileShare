@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	p := fileshare.Make()
-	fmt.Printf("success\n")
-	p.Hello()
+	m := fileshare.MakeSwarmMaster()
+	fileshare.Connect()
+	m.MasterTest()
 }

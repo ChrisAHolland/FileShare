@@ -4,31 +4,25 @@ import (
 	"../labrpc"
 	"fmt"
 	"log"
-	"net"
-	"net/http"
+	//"net"
+	//"net/http"
 	"net/rpc"
-	"os"
+	//"os"
 	"sync"
 )
 
 type Peer struct {
-	PeerID  int
-	Address string
-	Files   []string
-	mu      sync.Mutex
-	peers   []*labrpc.ClientEnd
+	PeerID int
+	Files  []string
+	mu     sync.Mutex
+	peers  []*labrpc.ClientEnd
 }
 
-func (p *Peer) RequestConnect(request *ConnectRequest, reply *ConnectReply) {
-
-}
-
-func (p *Peer) sendRequestConnect(peer int, request *ConnectRequest, reply *ConnectReply) {
-	ok := p.peers[peer].Call("Peer.RequestConnect", request, reply)
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	if ok {
+func Connect() {
+	request := ConnectRequest{}
+	reply := ConnectReply{}
+	call("SwarmMaster.ConnectPeer", &request, &reply)
+	if reply.Accepted == true {
 	}
 }
 
@@ -36,22 +30,20 @@ func (p *Peer) Hello() {
 	fmt.Printf("hello\n")
 }
 
-func (p *Peer) server() {
-	rpc.Register(p)
-	rpc.HandleHTTP()
-
+func call(rpcname string, args interface{}, reply interface{}) bool {
+	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
 	sockname := masterSock()
-	os.Remove(sockname)
-	l, e := net.Listen("unix", sockname)
-	if e != nil {
-		log.Fatal("listen error:", e)
+	c, err := rpc.DialHTTP("unix", sockname)
+	if err != nil {
+		log.Fatal("dialing:", err)
 	}
-	go http.Serve(l, nil)
-}
+	defer c.Close()
 
-func Make() *Peer {
-	p := Peer{}
-	//p.PeerID = me
+	err = c.Call(rpcname, args, reply)
+	if err == nil {
+		return true
+	}
 
-	return &p
+	fmt.Println(err)
+	return false
 }
