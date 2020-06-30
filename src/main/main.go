@@ -2,12 +2,13 @@ package main
 
 import (
 	"../fileshare"
-	"fmt"
+	//"fmt"
 	//"time"
 )
 
 func main() {
 	m := fileshare.MakeSwarmMaster()
-	fileshare.Connect()
+	p := fileshare.MakePeer()
+	p.Connect()
 	m.MasterTest()
 }

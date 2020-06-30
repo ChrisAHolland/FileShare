@@ -24,6 +24,16 @@ type ConnectReply struct {
 	Accepted bool
 }
 
+type PeerSendFile struct {
+	PeerID       int
+	FileContents string
+}
+
+type ServerReceiveFile struct {
+	FileContents string
+	Received     bool
+}
+
 // Add your RPC definitions here.
 
 // Cook up a unique-ish UNIX-domain socket name

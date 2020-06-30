@@ -8,6 +8,7 @@ import (
 	//"net/http"
 	"net/rpc"
 	//"os"
+	"io/ioutil"
 	"sync"
 )
 
@@ -18,11 +19,24 @@ type Peer struct {
 	peers  []*labrpc.ClientEnd
 }
 
-func Connect() {
+func SendFile() {
+	f, err := ioutil.ReadFile("test.txt")
+	if err != nil {
+		fmt.Printf("Error reading file: %v", err)
+	}
+	file := string(f)
+	fileRpcArgs := PeerSendFile{}
+	fileRpcReply := ServerReceiveFile{}
+	fileRpcArgs.FileContents = file
+	call("SwarmMaster.RegisterFile", &fileRpcArgs, &fileRpcReply)
+}
+
+func (p *Peer) Connect() {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
 	call("SwarmMaster.ConnectPeer", &request, &reply)
 	if reply.Accepted == true {
+		SendFile()
 	}
 }
 
@@ -46,4 +60,10 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 
 	fmt.Println(err)
 	return false
+}
+
+func MakePeer() *Peer {
+	p := Peer{}
+	p.PeerID = 1
+	return &p
 }

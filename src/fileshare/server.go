@@ -13,6 +13,7 @@ import (
 type SwarmMaster struct {
 	// Your definitions here.
 	peers []*labrpc.ClientEnd
+	files []string
 }
 
 func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) error {
@@ -24,10 +25,16 @@ func (m *SwarmMaster) MasterTest() {
 	fmt.Printf("swarm master is made\n")
 }
 
+func (m *SwarmMaster) RegisterFile(request *PeerSendFile, reply *ServerReceiveFile) error {
+	m.files[0] = request.FileContents
+	reply.Received = true
+	fmt.Printf("Server received: %v", request.FileContents)
+	return nil
+}
+
 func (m *SwarmMaster) server() {
 	rpc.Register(m)
 	rpc.HandleHTTP()
-	//l, e := net.Listen("tcp", ":1234")
 	sockname := masterSock()
 	os.Remove(sockname)
 	l, e := net.Listen("unix", sockname)
@@ -40,5 +47,6 @@ func (m *SwarmMaster) server() {
 func MakeSwarmMaster() *SwarmMaster {
 	m := SwarmMaster{}
 	m.server()
+	m.files = make([]string, 10)
 	return &m
 }
