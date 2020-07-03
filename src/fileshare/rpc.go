@@ -6,35 +6,50 @@ import (
 )
 
 /*
-*	Request RPC for Peer's to connect
- */
+	Request RPC for Peer's to connect
+*/
 type ConnectRequest struct {
-	PeerID  int
-	Address string
-	Port    int
+	PeerID int
 }
 
 /*
-*	Reply RPC for Peer's to connect
- */
+	Reply RPC for Peer's to connect
+*/
 type ConnectReply struct {
 	PeerID   int
-	Address  string
-	Port     int
 	Accepted bool
 }
 
+/*
+	RPC for a Peer to send a file to the server
+*/
 type PeerSendFile struct {
 	PeerID       int
+	FileName     string
 	FileContents string
 }
 
+/*
+	RPC for the server to confirm it received the file
+*/
 type ServerReceiveFile struct {
-	FileContents string
-	Received     bool
+	FileName string
+	Received bool
+	Accepted bool
 }
 
-// Add your RPC definitions here.
+type RequestFileArgs struct {
+	PeerID int
+	File   string
+}
+
+type RequestFileReply struct {
+	PeerID       int
+	FileExists   bool
+	ErrorMessage string
+	File         string
+	FileContents string
+}
 
 // Cook up a unique-ish UNIX-domain socket name
 // in /var/tmp, for the master.

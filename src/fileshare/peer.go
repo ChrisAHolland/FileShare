@@ -1,7 +1,7 @@
 package fileshare
 
 import (
-	"../labrpc"
+	//"../labrpc"
 	"fmt"
 	"log"
 	//"net"
@@ -16,32 +16,40 @@ type Peer struct {
 	PeerID int
 	Files  []string
 	mu     sync.Mutex
-	peers  []*labrpc.ClientEnd
 }
 
-func SendFile() {
-	f, err := ioutil.ReadFile("test.txt")
+func SendFile(file string, id int) {
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file: %v", err)
 	}
-	file := string(f)
+	data := string(f)
 	fileRpcArgs := PeerSendFile{}
 	fileRpcReply := ServerReceiveFile{}
-	fileRpcArgs.FileContents = file
+	fileRpcArgs.FileContents = data
+	fileRpcArgs.FileName = file
+	fileRpcArgs.PeerID = id
 	call("SwarmMaster.RegisterFile", &fileRpcArgs, &fileRpcReply)
 }
 
-func (p *Peer) Connect() {
+func (p *Peer) Connect(file string) {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
+	request.PeerID = p.PeerID
 	call("SwarmMaster.ConnectPeer", &request, &reply)
 	if reply.Accepted == true {
-		SendFile()
+		SendFile(file, p.PeerID)
 	}
 }
 
-func (p *Peer) Hello() {
-	fmt.Printf("hello\n")
+func (p *Peer) RequestFile(file string) {
+	requestFileArgs := RequestFileArgs{}
+	requestFileReply := RequestFileReply{}
+
+	requestFileArgs.PeerID = p.PeerID
+	requestFileArgs.File = file
+	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply)
+	fmt.Printf("Peer %v received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
 }
 
 func call(rpcname string, args interface{}, reply interface{}) bool {
@@ -62,8 +70,8 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 	return false
 }
 
-func MakePeer() *Peer {
+func MakePeer(id int) *Peer {
 	p := Peer{}
-	p.PeerID = 1
+	p.PeerID = id
 	return &p
 }
