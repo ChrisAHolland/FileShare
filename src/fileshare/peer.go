@@ -6,19 +6,21 @@ import (
 	"log"
 	//"net"
 	//"net/http"
-	"net/rpc"
-	//"os"
 	"io/ioutil"
+	"net/rpc"
+	"os"
+	"path/filepath"
 	"sync"
 )
 
 type Peer struct {
-	PeerID int
-	Files  []string
-	mu     sync.Mutex
+	PeerID    int
+	files     []string
+	directory string
+	mu        sync.Mutex
 }
 
-func SendFile(file string, id int) {
+func (p *Peer) SendFile(file string, id int) {
 	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file: %v", err)
@@ -38,7 +40,7 @@ func (p *Peer) Connect(file string) {
 	request.PeerID = p.PeerID
 	call("SwarmMaster.ConnectPeer", &request, &reply)
 	if reply.Accepted == true {
-		SendFile(file, p.PeerID)
+		p.SendFile(file, p.PeerID)
 	}
 }
 
@@ -49,11 +51,28 @@ func (p *Peer) RequestFile(file string) {
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
 	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply)
+	saveFile(requestFileReply.File, requestFileReply.FileContents)
 	fmt.Printf("Peer %v received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
 }
 
+func saveFile(fileName string, fileContents string) {
+	filePath, _ := filepath.Abs("peerdata/" + fileName)
+	f, err := os.Create(filePath)
+	if err != nil {
+		fmt.Printf("Error creating the file: %v\n", err)
+		return
+	}
+
+	l, err := f.WriteString(fileContents)
+	if err != nil {
+		fmt.Printf("Error writing the file: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Peer saved file successfully %v\n", l)
+}
+
 func call(rpcname string, args interface{}, reply interface{}) bool {
-	// c, err := rpc.DialHTTP("tcp", "127.0.0.1"+":1234")
 	sockname := masterSock()
 	c, err := rpc.DialHTTP("unix", sockname)
 	if err != nil {
@@ -73,5 +92,7 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 func MakePeer(id int) *Peer {
 	p := Peer{}
 	p.PeerID = id
+	//p.directory = directory
+	p.files = make([]string, 10)
 	return &p
 }

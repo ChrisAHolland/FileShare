@@ -17,6 +17,7 @@ type SwarmMaster struct {
 	numFiles     int
 	peers        []int
 	numPeers     int
+	directory    string
 	mu           sync.Mutex
 }
 
@@ -52,7 +53,7 @@ func (m *SwarmMaster) RegisterFile(request *PeerSendFile, reply *ServerReceiveFi
 	m.files[m.numFiles] = request.FileName
 	m.fileContents[m.numFiles] = request.FileContents
 	m.numFiles = m.numFiles + 1
-	fmt.Printf("Server: Received %v from Peer: %v\n", request.FileName, request.PeerID)
+	fmt.Printf("SwarmMaster: Received %v from Peer: %v\n", request.FileName, request.PeerID)
 	return nil
 }
 
