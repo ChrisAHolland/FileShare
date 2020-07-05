@@ -20,7 +20,7 @@ type Peer struct {
 	mu        sync.Mutex
 }
 
-func (p *Peer) SendFile(file string, id int) {
+func (p *Peer) SendFile(file string) {
 	f, err := ioutil.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error reading file: %v", err)
@@ -30,17 +30,17 @@ func (p *Peer) SendFile(file string, id int) {
 	fileRpcReply := ServerReceiveFile{}
 	fileRpcArgs.FileContents = data
 	fileRpcArgs.FileName = file
-	fileRpcArgs.PeerID = id
+	fileRpcArgs.PeerID = p.PeerID
 	call("SwarmMaster.RegisterFile", &fileRpcArgs, &fileRpcReply)
 }
 
-func (p *Peer) Connect(file string) {
+func (p *Peer) Connect() {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
 	request.PeerID = p.PeerID
 	call("SwarmMaster.ConnectPeer", &request, &reply)
 	if reply.Accepted == true {
-		p.SendFile(file, p.PeerID)
+		fmt.Printf("Peer %v: Connected to SwarmMaster\n", p.PeerID)
 	}
 }
 
@@ -51,11 +51,11 @@ func (p *Peer) RequestFile(file string) {
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
 	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply)
-	saveFile(requestFileReply.File, requestFileReply.FileContents)
+	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID)
 	fmt.Printf("Peer %v received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
 }
 
-func saveFile(fileName string, fileContents string) {
+func saveFile(fileName string, fileContents string, id int) {
 	filePath, _ := filepath.Abs("peerdata/" + fileName)
 	f, err := os.Create(filePath)
 	if err != nil {
@@ -65,11 +65,11 @@ func saveFile(fileName string, fileContents string) {
 
 	l, err := f.WriteString(fileContents)
 	if err != nil {
-		fmt.Printf("Error writing the file: %v\n", err)
+		fmt.Printf("Error writing the file: %v %v\n", err, l)
 		return
 	}
 
-	fmt.Printf("Peer saved file successfully %v\n", l)
+	fmt.Printf("Peer %v: Saved file successfully %v\n", id, fileName)
 }
 
 func call(rpcname string, args interface{}, reply interface{}) bool {

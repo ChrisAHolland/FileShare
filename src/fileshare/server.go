@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -54,6 +55,8 @@ func (m *SwarmMaster) RegisterFile(request *PeerSendFile, reply *ServerReceiveFi
 	m.fileContents[m.numFiles] = request.FileContents
 	m.numFiles = m.numFiles + 1
 	fmt.Printf("SwarmMaster: Received %v from Peer: %v\n", request.FileName, request.PeerID)
+
+	serverSaveFile(request.FileName, request.FileContents)
 	return nil
 }
 
@@ -72,6 +75,23 @@ func (m *SwarmMaster) ServeFile(request *RequestFileArgs, reply *RequestFileRepl
 	reply.File = request.File
 	reply.PeerID = request.PeerID
 	return nil
+}
+
+func serverSaveFile(fileName string, fileContents string) {
+	filePath, _ := filepath.Abs("files/" + fileName)
+	f, err := os.Create(filePath)
+	if err != nil {
+		fmt.Printf("Error creating the file: %v\n", err)
+		return
+	}
+
+	l, err := f.WriteString(fileContents)
+	if err != nil {
+		fmt.Printf("Error writing the file: %v %v\n", err, l)
+		return
+	}
+
+	fmt.Printf("SwarmMaster saved file successfully %v\n", fileName)
 }
 
 /*
