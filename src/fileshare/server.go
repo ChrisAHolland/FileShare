@@ -1,7 +1,6 @@
 package fileshare
 
 import (
-	//"../labrpc"
 	"fmt"
 	"log"
 	"net"
@@ -43,12 +42,12 @@ func (m *SwarmMaster) MasterTest() {
 */
 func (m *SwarmMaster) RegisterFile(request *PeerSendFile, reply *ServerReceiveFile) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	reply.Received = true
 	if m.CheckExisting(request.FileName) {
 		reply.Accepted = false
 		reply.FileName = request.FileName
+		m.mu.Unlock()
 		return nil
 	}
 	m.files[m.numFiles] = request.FileName
@@ -56,7 +55,8 @@ func (m *SwarmMaster) RegisterFile(request *PeerSendFile, reply *ServerReceiveFi
 	m.numFiles = m.numFiles + 1
 	fmt.Printf("SwarmMaster: Received %v from Peer: %v\n", request.FileName, request.PeerID)
 
-	serverSaveFile(request.FileName, request.FileContents)
+	m.mu.Unlock()
+	m.serverSaveFile(request.FileName, request.FileContents)
 	return nil
 }
 
@@ -67,6 +67,7 @@ func (m *SwarmMaster) ServeFile(request *RequestFileArgs, reply *RequestFileRepl
 			reply.File = m.files[i]
 			reply.FileContents = m.fileContents[i]
 			reply.PeerID = request.PeerID
+			fmt.Printf("SwarmMaster: Peer %v requested %v, but the file does not exist\n", request.PeerID, request.File)
 			return nil
 		}
 	}
@@ -74,10 +75,14 @@ func (m *SwarmMaster) ServeFile(request *RequestFileArgs, reply *RequestFileRepl
 	reply.ErrorMessage = "File not found on the SwarmMaster\n"
 	reply.File = request.File
 	reply.PeerID = request.PeerID
+	fmt.Printf("SwarmMaster: Served file %v to Peer %v\n", request.File, request.PeerID)
 	return nil
 }
 
-func serverSaveFile(fileName string, fileContents string) {
+func (m *SwarmMaster) serverSaveFile(fileName string, fileContents string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	filePath, _ := filepath.Abs("files/" + fileName)
 	f, err := os.Create(filePath)
 	if err != nil {
@@ -91,7 +96,7 @@ func serverSaveFile(fileName string, fileContents string) {
 		return
 	}
 
-	fmt.Printf("SwarmMaster saved file successfully %v\n", fileName)
+	fmt.Printf("SwarmMaster: Saved file successfully %v\n", fileName)
 }
 
 /*

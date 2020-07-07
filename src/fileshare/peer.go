@@ -1,7 +1,6 @@
 package fileshare
 
 import (
-	//"../labrpc"
 	"fmt"
 	"log"
 	//"net"
