@@ -51,12 +51,12 @@ func (p *Peer) RequestFile(file string) {
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
 	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply)
-	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID)
-	fmt.Printf("Peer %v received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
+	fmt.Printf("Peer %v: Received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
+	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID, p.directory)
 }
 
-func saveFile(fileName string, fileContents string, id int) {
-	filePath, _ := filepath.Abs("peerdata/" + fileName)
+func saveFile(fileName string, fileContents string, id int, directory string) {
+	filePath, _ := filepath.Abs("peerdata/" + directory + fileName)
 	f, err := os.Create(filePath)
 	if err != nil {
 		fmt.Printf("Error creating the file: %v\n", err)
@@ -89,10 +89,10 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 	return false
 }
 
-func MakePeer(id int) *Peer {
+func MakePeer(id int, directory string) *Peer {
 	p := Peer{}
 	p.PeerID = id
-	//p.directory = directory
+	p.directory = directory
 	p.files = make([]string, 10)
 	return &p
 }
