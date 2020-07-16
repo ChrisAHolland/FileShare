@@ -84,7 +84,6 @@ func saveFile(fileName string, fileContents string, id int, directory string) {
 }
 
 func call(rpcname string, args interface{}, reply interface{}, port string) bool {
-	//sockname := masterSock()
 	c, err := rpc.DialHTTP("tcp", port)
 	if err != nil {
 		log.Fatal("dialing:", err)
@@ -100,37 +99,14 @@ func call(rpcname string, args interface{}, reply interface{}, port string) bool
 }
 
 func (p *Peer) peerServer(port string) {
-	/*
-		rpc.Register(p)
-		rpc.HandleHTTP()
-
-		sockname := masterSock()
-		os.Remove(sockname)
-
-		l, e := net.Listen("unix", sockname)
-		if e != nil {
-			log.Fatal("listen error:", e)
-		}
-		go http.Serve(l, nil)
-	*/
 	rpc.Register(p)
 	serv := rpc.NewServer()
 	serv.Register(p)
-
-	// ===== workaround ==========
 	oldMux := http.DefaultServeMux
 	mux := http.NewServeMux()
 	http.DefaultServeMux = mux
-	// ===========================
-
 	serv.HandleHTTP(rpc.DefaultRPCPath, rpc.DefaultDebugPath)
-
-	// ===== workaround ==========
 	http.DefaultServeMux = oldMux
-	// ===========================
-	//sockname := masterSock()
-	//os.Remove(sockname)
-
 	l, err := net.Listen("tcp", port)
 	if err != nil {
 		panic(err)
