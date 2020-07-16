@@ -2,10 +2,10 @@ package fileshare
 
 import (
 	"fmt"
-	"log"
-	//"net"
-	//"net/http"
 	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
 	"net/rpc"
 	"os"
 	"path/filepath"
@@ -16,6 +16,7 @@ type Peer struct {
 	PeerID    int
 	files     []string
 	directory string
+	Port      string
 	mu        sync.Mutex
 }
 
@@ -30,14 +31,25 @@ func (p *Peer) SendFile(file string) {
 	fileRpcArgs.FileContents = data
 	fileRpcArgs.FileName = file
 	fileRpcArgs.PeerID = p.PeerID
-	call("SwarmMaster.RegisterFile", &fileRpcArgs, &fileRpcReply)
+	call("SwarmMaster.RegisterFile", &fileRpcArgs, &fileRpcReply, p.Port)
 }
 
-func (p *Peer) Connect() {
+func (p *Peer) AcceptConnect(request *ConnectRequest, reply *ConnectReply) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	reply.Accepted = true
+	reply.PeerID = request.PeerID
+
+	fmt.Printf("Peer %v: Connected to Peer: %v\n", p.PeerID, request.PeerID)
+	return nil
+}
+
+func (p *Peer) Connect(port string) {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
 	request.PeerID = p.PeerID
-	call("SwarmMaster.ConnectPeer", &request, &reply)
+	call("Peer.AcceptConnect", &request, &reply, port)
 	if reply.Accepted == true {
 		fmt.Printf("Peer %v: Connected to SwarmMaster\n", p.PeerID)
 	}
@@ -49,7 +61,7 @@ func (p *Peer) RequestFile(file string) {
 
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
-	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply)
+	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply, p.Port)
 	fmt.Printf("Peer %v: Received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
 	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID, p.directory)
 }
@@ -71,9 +83,9 @@ func saveFile(fileName string, fileContents string, id int, directory string) {
 	fmt.Printf("Peer %v: Saved file successfully %v\n", id, fileName)
 }
 
-func call(rpcname string, args interface{}, reply interface{}) bool {
-	sockname := masterSock()
-	c, err := rpc.DialHTTP("unix", sockname)
+func call(rpcname string, args interface{}, reply interface{}, port string) bool {
+	//sockname := masterSock()
+	c, err := rpc.DialHTTP("tcp", port)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
@@ -83,15 +95,56 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 	if err == nil {
 		return true
 	}
-
 	fmt.Println(err)
 	return false
 }
 
-func MakePeer(id int, directory string) *Peer {
+func (p *Peer) peerServer(port string) {
+	/*
+		rpc.Register(p)
+		rpc.HandleHTTP()
+
+		sockname := masterSock()
+		os.Remove(sockname)
+
+		l, e := net.Listen("unix", sockname)
+		if e != nil {
+			log.Fatal("listen error:", e)
+		}
+		go http.Serve(l, nil)
+	*/
+	rpc.Register(p)
+	serv := rpc.NewServer()
+	serv.Register(p)
+
+	// ===== workaround ==========
+	oldMux := http.DefaultServeMux
+	mux := http.NewServeMux()
+	http.DefaultServeMux = mux
+	// ===========================
+
+	serv.HandleHTTP(rpc.DefaultRPCPath, rpc.DefaultDebugPath)
+
+	// ===== workaround ==========
+	http.DefaultServeMux = oldMux
+	// ===========================
+	//sockname := masterSock()
+	//os.Remove(sockname)
+
+	l, err := net.Listen("tcp", port)
+	if err != nil {
+		panic(err)
+	}
+	go http.Serve(l, mux)
+
+}
+
+func MakePeer(id int, directory string, port string) *Peer {
 	p := Peer{}
 	p.PeerID = id
 	p.directory = directory
 	p.files = make([]string, 10)
+	p.Port = port
+	p.peerServer(port)
 	return &p
 }

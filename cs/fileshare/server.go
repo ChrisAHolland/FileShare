@@ -117,8 +117,10 @@ func (m *SwarmMaster) CheckExisting(file string) bool {
 func (m *SwarmMaster) server() {
 	rpc.Register(m)
 	rpc.HandleHTTP()
+
 	sockname := masterSock()
 	os.Remove(sockname)
+
 	l, e := net.Listen("unix", sockname)
 	if e != nil {
 		log.Fatal("listen error:", e)
