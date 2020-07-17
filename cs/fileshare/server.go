@@ -67,7 +67,7 @@ func (m *SwarmMaster) ServeFile(request *RequestFileArgs, reply *RequestFileRepl
 			reply.File = m.files[i]
 			reply.FileContents = m.fileContents[i]
 			reply.PeerID = request.PeerID
-			fmt.Printf("SwarmMaster: Peer %v requested %v, but the file does not exist\n", request.PeerID, request.File)
+			fmt.Printf("SwarmMaster: Served file %v to Peer %v\n", request.File, request.PeerID)
 			return nil
 		}
 	}
@@ -75,7 +75,7 @@ func (m *SwarmMaster) ServeFile(request *RequestFileArgs, reply *RequestFileRepl
 	reply.ErrorMessage = "File not found on the SwarmMaster\n"
 	reply.File = request.File
 	reply.PeerID = request.PeerID
-	fmt.Printf("SwarmMaster: Served file %v to Peer %v\n", request.File, request.PeerID)
+	fmt.Printf("SwarmMaster: Peer %v requested %v, but the file does not exist\n", request.PeerID, request.File)
 	return nil
 }
 
