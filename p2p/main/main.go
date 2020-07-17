@@ -10,10 +10,12 @@ func main() {
 	//m := fileshare.MakeSwarmMaster()
 	//m.MasterTest()
 
-	p := fileshare.MakePeer(1, "peer1/", ":60122")
-	p2 := fileshare.MakePeer(2, "peer2/", ":60123")
+	p := fileshare.MakePeer(1, "testdirs/peer1/", ":60122")
+	p2 := fileshare.MakePeer(2, "testdirs/peer2/", ":60123")
 	p.Connect(p2)
 	p2.Connect(p)
+	p2.RegisterFile("test.txt")
+	p.RequestFile(p2, "test.txt")
 	/*
 		p.SendFile("test.txt")
 		p2.SendFile("test2.txt")

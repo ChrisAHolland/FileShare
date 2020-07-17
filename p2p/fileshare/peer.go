@@ -80,22 +80,66 @@ func (p *Peer) Connect(peer *Peer) {
 	fmt.Printf("Peer %v: Connected to Peer %v\n", p.PeerID, peer.PeerID)
 }
 
-func (p *Peer) RequestFile(file string) {
+func (p *Peer) RequestFile(peer *Peer, file string) {
 	requestFileArgs := RequestFileArgs{}
 	requestFileReply := RequestFileReply{}
-
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
-	call("SwarmMaster.ServeFile", &requestFileArgs, &requestFileReply, p.Port)
-	fmt.Printf("Peer %v: Received %v from SwarmMaster\n", p.PeerID, requestFileReply.File)
+	call("Peer.ServeFile", &requestFileArgs, &requestFileReply, peer.Port)
+
+	if requestFileReply.FileExists == false {
+		fmt.Printf("Peer %v: Did not receive %v from Peer %v, the file does not exist\n", p.PeerID, file, peer.PeerID)
+		return
+	}
+
+	fmt.Printf("Peer %v: Received %v from Peer %v\n", p.PeerID, requestFileReply.File, peer.PeerID)
 	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID, p.directory)
+}
+
+func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) error {
+	for i := 0; i <= p.numFiles; i++ {
+		if p.files[i] == request.File {
+			reply.FileExists = true
+			reply.File = p.files[i]
+			reply.FileContents = p.fileContents[i]
+			reply.PeerID = request.PeerID
+			fmt.Printf("Peer %v: Served file %v to Peer %v\n", p.PeerID, request.File, request.PeerID)
+			return nil
+		}
+	}
+	reply.FileExists = false
+	reply.ErrorMessage = "File not found on the SwarmMaster\n"
+	reply.File = request.File
+	reply.PeerID = request.PeerID
+	fmt.Printf("Peer %v: Peer %v requested %v, but the file does not exist\n", p.PeerID, request.PeerID, request.File)
+	return nil
+}
+
+func (p *Peer) RegisterFile(fileName string) error {
+	p.mu.Lock()
+
+	f, err := ioutil.ReadFile(p.directory + fileName)
+	if err != nil {
+		fmt.Printf("Error reading file: %v\n", err)
+	}
+
+	data := string(f)
+
+	p.files[p.numFiles] = fileName
+	p.fileContents[p.numFiles] = data
+	p.numFiles = p.numFiles + 1
+	fmt.Printf("Peer %v: Registered file %v\n", p.PeerID, fileName)
+
+	p.mu.Unlock()
+	//saveFile(fileName, data, p.PeerID, p.directory)
+	return nil
 }
 
 /*
 	Saves a newly received file to the Peer's directory
 */
 func saveFile(fileName string, fileContents string, id int, directory string) {
-	filePath, _ := filepath.Abs("peerdata/" + directory + fileName)
+	filePath, _ := filepath.Abs(directory + fileName)
 	f, err := os.Create(filePath)
 	if err != nil {
 		fmt.Printf("Error creating the file: %v\n", err)
