@@ -80,6 +80,9 @@ func (p *Peer) Connect(peer *Peer) {
 	fmt.Printf("Peer %v: Connected to Peer %v\n", p.PeerID, peer.PeerID)
 }
 
+/*
+	Requests a given file from a given Peer
+*/
 func (p *Peer) RequestFile(peer *Peer, file string) {
 	requestFileArgs := RequestFileArgs{}
 	requestFileReply := RequestFileReply{}
@@ -96,6 +99,9 @@ func (p *Peer) RequestFile(peer *Peer, file string) {
 	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID, p.directory)
 }
 
+/*
+	Handles file request RPCs (RequestFileArgs{}) from other Peers
+*/
 func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) error {
 	for i := 0; i <= p.numFiles; i++ {
 		if p.files[i] == request.File {
@@ -115,8 +121,12 @@ func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) erro
 	return nil
 }
 
+/*
+	Registers a file that a Peer has on disk into the FileShare system
+*/
 func (p *Peer) RegisterFile(fileName string) error {
 	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	f, err := ioutil.ReadFile(p.directory + fileName)
 	if err != nil {
@@ -129,9 +139,6 @@ func (p *Peer) RegisterFile(fileName string) error {
 	p.fileContents[p.numFiles] = data
 	p.numFiles = p.numFiles + 1
 	fmt.Printf("Peer %v: Registered file %v\n", p.PeerID, fileName)
-
-	p.mu.Unlock()
-	//saveFile(fileName, data, p.PeerID, p.directory)
 	return nil
 }
 
