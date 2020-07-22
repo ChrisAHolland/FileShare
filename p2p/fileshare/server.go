@@ -17,8 +17,10 @@ type SwarmMaster struct {
 }
 
 type PeerInfo struct {
-	PeerId int
-	Port   string
+	PeerId   int
+	Port     string
+	Files    [10]string
+	numFiles int
 }
 
 func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) error {
@@ -36,6 +38,25 @@ func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) 
 
 func (m *SwarmMaster) MasterTest() {
 	fmt.Printf("SwarmMaster is ready...\n")
+}
+
+func (m *SwarmMaster) Register(request *PeerSendFile, reply *ServerReceiveFile) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	reply.Accepted = false
+	reply.FileName = request.FileName
+	reply.Received = true
+	for i := 0; i <= m.numPeers; i++ {
+		if m.peers[i].PeerId == request.PeerID {
+			m.peers[i].numFiles++
+			m.peers[i].Files[m.peers[i].numFiles] = request.FileName
+			reply.Accepted = true
+			fmt.Printf("SwarmMaster: Registered %v from Peer %v\n", request.FileName, request.PeerID)
+			break
+		}
+	}
+	return nil
 }
 
 /*

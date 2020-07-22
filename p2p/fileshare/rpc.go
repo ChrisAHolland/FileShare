@@ -25,9 +25,8 @@ type ConnectReply struct {
 	RPC for a Peer to send a file to the server
 */
 type PeerSendFile struct {
-	PeerID       int
-	FileName     string
-	FileContents string
+	PeerID   int
+	FileName string
 }
 
 /*

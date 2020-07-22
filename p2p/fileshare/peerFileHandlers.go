@@ -85,6 +85,12 @@ func (p *Peer) RegisterFile(fileName string) error {
 	p.files[p.numFiles] = fileName
 	p.fileContents[p.numFiles] = data
 	p.numFiles = p.numFiles + 1
+
+	request := PeerSendFile{}
+	reply := ServerReceiveFile{}
+	request.FileName = fileName
+	request.PeerID = p.PeerID
+	serverCall("SwarmMaster.Register", &request, &reply)
 	fmt.Printf("Peer %v: Registered file %v\n", p.PeerID, fileName)
 	return nil
 }
