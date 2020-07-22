@@ -59,6 +59,25 @@ func (m *SwarmMaster) Register(request *PeerSendFile, reply *ServerReceiveFile) 
 	return nil
 }
 
+func (m *SwarmMaster) SearchFile(request *RequestFileArgs, reply *FindPeerReply) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	reply.Found = false
+	reply.File = request.File
+	for i := 0; i <= m.numPeers; i++ {
+		for j := 0; j <= m.peers[i].numFiles; j++ {
+			if request.File == m.peers[i].Files[j] {
+				reply.Found = true
+				reply.PeerID = m.peers[i].PeerId
+				reply.Port = m.peers[i].Port
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
 /*
 	Starts a SwarmMaster's server
 */

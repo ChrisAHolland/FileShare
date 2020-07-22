@@ -51,6 +51,13 @@ type RequestFileReply struct {
 	FileContents string
 }
 
+type FindPeerReply struct {
+	PeerID int
+	Port   string
+	File   string
+	Found  bool
+}
+
 // Cook up a unique-ish UNIX-domain socket name
 // in /var/tmp, for the master.
 // Can't use the current directory since

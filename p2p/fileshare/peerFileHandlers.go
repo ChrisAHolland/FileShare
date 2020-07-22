@@ -30,19 +30,19 @@ import (
 /*
 	Requests a given file from a given Peer
 */
-func (p *Peer) RequestFile(peer *Peer, file string) {
+func (p *Peer) RequestFile(port string, id int, file string) {
 	requestFileArgs := RequestFileArgs{}
 	requestFileReply := RequestFileReply{}
 	requestFileArgs.PeerID = p.PeerID
 	requestFileArgs.File = file
-	call("Peer.ServeFile", &requestFileArgs, &requestFileReply, peer.Port)
+	call("Peer.ServeFile", &requestFileArgs, &requestFileReply, port)
 
 	if requestFileReply.FileExists == false {
-		fmt.Printf("Peer %v: Did not receive %v from Peer %v, the file does not exist\n", p.PeerID, file, peer.PeerID)
+		fmt.Printf("Peer %v: Did not receive %v from Peer %v, the file does not exist\n", p.PeerID, file, id)
 		return
 	}
 
-	fmt.Printf("Peer %v: Received %v from Peer %v\n", p.PeerID, requestFileReply.File, peer.PeerID)
+	fmt.Printf("Peer %v: Received %v from Peer %v\n", p.PeerID, requestFileReply.File, id)
 	saveFile(requestFileReply.File, requestFileReply.FileContents, p.PeerID, p.directory)
 }
 
@@ -92,6 +92,23 @@ func (p *Peer) RegisterFile(fileName string) error {
 	request.PeerID = p.PeerID
 	serverCall("SwarmMaster.Register", &request, &reply)
 	fmt.Printf("Peer %v: Registered file %v\n", p.PeerID, fileName)
+	return nil
+}
+
+func (p *Peer) SearchForFile(fileName string) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	request := RequestFileArgs{}
+	reply := FindPeerReply{}
+	request.File = fileName
+	request.PeerID = p.PeerID
+	serverCall("SwarmMaster.SearchFile", &request, &reply)
+
+	if reply.Found {
+		p.ConnectPeer(reply.Port, reply.PeerID)
+		p.RequestFile(reply.Port, reply.PeerID, reply.File)
+	}
 	return nil
 }
 

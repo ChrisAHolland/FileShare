@@ -38,19 +38,19 @@ func (p *Peer) AcceptConnect(request *ConnectRequest, reply *ConnectReply) error
 /*
 	Connects the Peer to the provided Peer
 */
-func (p *Peer) ConnectPeer(peer *Peer) {
+func (p *Peer) ConnectPeer(port string, id int) {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
 	request.PeerID = p.PeerID
 	request.Port = p.Port
-	call("Peer.AcceptConnect", &request, &reply, peer.Port)
+	call("Peer.AcceptConnect", &request, &reply, port)
 	if reply.Accepted == false {
-		fmt.Printf("Peer %v: Connection refused from Peer %v\n", p.PeerID, peer.PeerID)
+		fmt.Printf("Peer %v: Connection refused from Peer %v\n", p.PeerID, id)
 		return
 	}
-	p.peers[p.numPeers] = peer.PeerID
+	p.peers[p.numPeers] = id
 	p.numPeers = p.numPeers + 1
-	fmt.Printf("Peer %v: Connected to Peer %v\n", p.PeerID, peer.PeerID)
+	fmt.Printf("Peer %v: Connected to Peer %v\n", p.PeerID, id)
 }
 
 /*
