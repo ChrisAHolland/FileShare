@@ -11,9 +11,14 @@ import (
 )
 
 type SwarmMaster struct {
-	peers    []int
+	peers    []PeerInfo
 	numPeers int
 	mu       sync.Mutex
+}
+
+type PeerInfo struct {
+	PeerId int
+	Port   string
 }
 
 func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) error {
@@ -22,7 +27,8 @@ func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) 
 
 	reply.Accepted = true
 	reply.PeerID = request.PeerID
-	m.peers[m.numPeers] = request.PeerID
+	m.peers[m.numPeers].PeerId = request.PeerID
+	m.peers[m.numPeers].Port = request.Port
 	m.numPeers = m.numPeers + 1
 	fmt.Printf("SwarmMaster: Connected to Peer: %v\n", request.PeerID)
 	return nil
@@ -55,7 +61,8 @@ func (m *SwarmMaster) server() {
 */
 func MakeSwarmMaster() *SwarmMaster {
 	m := SwarmMaster{}
-	m.peers = make([]int, 10)
+	// 10 Peers is arbitrary
+	m.peers = make([]PeerInfo, 10)
 	m.numPeers = 0
 	m.server()
 	return &m

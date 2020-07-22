@@ -10,6 +10,7 @@ import (
 */
 type ConnectRequest struct {
 	PeerID int
+	Port   string
 }
 
 /*
