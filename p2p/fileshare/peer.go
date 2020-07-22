@@ -66,7 +66,7 @@ func (p *Peer) AcceptConnect(request *ConnectRequest, reply *ConnectReply) error
 /*
 	Connects the Peer to the provided Peer
 */
-func (p *Peer) Connect(peer *Peer) {
+func (p *Peer) ConnectPeer(peer *Peer) {
 	request := ConnectRequest{}
 	reply := ConnectReply{}
 	request.PeerID = p.PeerID
@@ -78,6 +78,19 @@ func (p *Peer) Connect(peer *Peer) {
 	p.peers[p.numPeers] = peer.PeerID
 	p.numPeers = p.numPeers + 1
 	fmt.Printf("Peer %v: Connected to Peer %v\n", p.PeerID, peer.PeerID)
+}
+
+/*
+	Connects the Peer to the SwarmMaster
+*/
+func (p *Peer) ConnectServer() {
+	request := ConnectRequest{}
+	reply := ConnectReply{}
+	request.PeerID = p.PeerID
+	serverCall("SwarmMaster.ConnectPeer", &request, &reply)
+	if reply.Accepted == true {
+		fmt.Printf("Peer %v: Connected to SwarmMaster\n", p.PeerID)
+	}
 }
 
 /*
@@ -167,6 +180,22 @@ func saveFile(fileName string, fileContents string, id int, directory string) {
 */
 func call(rpcname string, args interface{}, reply interface{}, port string) bool {
 	c, err := rpc.DialHTTP("tcp", port)
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+	defer c.Close()
+
+	err = c.Call(rpcname, args, reply)
+	if err == nil {
+		return true
+	}
+	fmt.Println(err)
+	return false
+}
+
+func serverCall(rpcname string, args interface{}, reply interface{}) bool {
+	sockname := masterSock()
+	c, err := rpc.DialHTTP("unix", sockname)
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}
