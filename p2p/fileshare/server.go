@@ -65,16 +65,19 @@ func (m *SwarmMaster) SearchFile(request *RequestFileArgs, reply *FindPeerReply)
 
 	reply.Found = false
 	reply.File = request.File
+	fmt.Printf("SwarmMaster: Peer %v requested a search for file %v\n", request.PeerID, request.File)
 	for i := 0; i <= m.numPeers; i++ {
 		for j := 0; j <= m.peers[i].numFiles; j++ {
 			if request.File == m.peers[i].Files[j] {
 				reply.Found = true
 				reply.PeerID = m.peers[i].PeerId
 				reply.Port = m.peers[i].Port
+				fmt.Printf("SwarmMaster: Found file %v for Peer %v on Peer %v\n", request.File, request.PeerID, m.peers[i].PeerId)
 				return nil
 			}
 		}
 	}
+	fmt.Printf("SwarmMaster: Cannot find a Peer containing file %v for Peer %v", request.File, request.PeerID)
 	return nil
 }
 
