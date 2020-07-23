@@ -1,3 +1,7 @@
+/*
+	This file contains the SwarmMaster structs, functions and RPC handlers.
+*/
+
 package fileshare
 
 import (
@@ -10,12 +14,20 @@ import (
 	"sync"
 )
 
+/*
+	SwarmMaster data type for the server.
+*/
 type SwarmMaster struct {
 	peers    []PeerInfo
 	numPeers int
 	mu       sync.Mutex
 }
 
+/*
+	A lightweight data type for the SwarmMaster to
+	hold relevant information about the Peers connected
+	to it, including their port and the files they posses.
+*/
 type PeerInfo struct {
 	PeerId   int
 	Port     string
@@ -23,6 +35,10 @@ type PeerInfo struct {
 	numFiles int
 }
 
+/*
+	RPC handler for when a Peer wishes to connect
+	to the SwarmMaster.
+*/
 func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -36,10 +52,20 @@ func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) 
 	return nil
 }
 
+/*
+	Simple function to let us know when the
+	SwarmMaster has successfully been built.
+*/
 func (m *SwarmMaster) MasterTest() {
 	fmt.Printf("SwarmMaster is ready...\n")
 }
 
+/*
+	RPC handler for when a Peer registers a file in
+	the FileShare system to be shareable. This function will
+	update the SwarmMaster's peers data to include the new
+	file.
+*/
 func (m *SwarmMaster) Register(request *PeerSendFile, reply *ServerReceiveFile) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -59,6 +85,13 @@ func (m *SwarmMaster) Register(request *PeerSendFile, reply *ServerReceiveFile) 
 	return nil
 }
 
+/*
+	RPC handler for when a Peer is in search of a file.
+	This function will search the registered files in each
+	Peer's file list to find which Peer contains the requested
+	file. Then a FindPeerReply RPC will be sent to the requesting
+	Peer telling it how to contact the Peer with the desired file.
+*/
 func (m *SwarmMaster) SearchFile(request *RequestFileArgs, reply *FindPeerReply) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
