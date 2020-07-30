@@ -25,6 +25,19 @@ type Peer struct {
 }
 
 /*
+	A lightweight data type for the SwarmMaster to
+	hold relevant information about the Peers connected
+	to it, including their port and the files they posses.
+*/
+type PeerInfo struct {
+	PeerId      int
+	Port        string
+	Files       [10]string
+	numFiles    int
+	isConnected bool
+}
+
+/*
 	Method used to make Remote Procedure Calls (RPCs)
 	Adopted from provided lab code
 */
@@ -44,8 +57,8 @@ func call(rpcname string, args interface{}, reply interface{}, port string) bool
 }
 
 func serverCall(rpcname string, args interface{}, reply interface{}) bool {
-	sockname := masterSock()
-	c, err := rpc.DialHTTP("unix", sockname)
+	//sockname := masterSock()
+	c, err := rpc.DialHTTP("tcp", ":3123")
 	if err != nil {
 		log.Fatal("dialing:", err)
 	}

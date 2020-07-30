@@ -10,7 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
-	"os"
+	//	"os"
 	"sync"
 )
 
@@ -21,18 +21,6 @@ type SwarmMaster struct {
 	peers    []PeerInfo
 	numPeers int
 	mu       sync.Mutex
-}
-
-/*
-	A lightweight data type for the SwarmMaster to
-	hold relevant information about the Peers connected
-	to it, including their port and the files they posses.
-*/
-type PeerInfo struct {
-	PeerId   int
-	Port     string
-	Files    [10]string
-	numFiles int
 }
 
 /*
@@ -47,6 +35,7 @@ func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) 
 	reply.PeerID = request.PeerID
 	m.peers[m.numPeers].PeerId = request.PeerID
 	m.peers[m.numPeers].Port = request.Port
+	m.peers[m.numPeers].isConnected = true
 	m.numPeers = m.numPeers + 1
 	fmt.Printf("SwarmMaster: Connected to Peer: %v\n", request.PeerID)
 	return nil
@@ -121,10 +110,7 @@ func (m *SwarmMaster) server() {
 	rpc.Register(m)
 	rpc.HandleHTTP()
 
-	sockname := masterSock()
-	os.Remove(sockname)
-
-	l, e := net.Listen("unix", sockname)
+	l, e := net.Listen("tcp", ":3123")
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}

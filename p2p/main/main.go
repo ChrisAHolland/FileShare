@@ -2,12 +2,18 @@ package main
 
 import (
 	"../fileshare"
-	//"fmt"
-	//"time"
+	"fmt"
+	"time"
 )
 
 func main() {
+	start := time.Now()
 	m := fileshare.MakeSwarmMaster()
+	t1 := time.Now()
+	elapsed := t1.Sub(start)
+
+	fmt.Printf("SwarmMaster start time: %v\n", elapsed)
+
 	m.MasterTest()
 
 	p := fileshare.MakePeer(1, "testdirs/peer1/", ":60122")
