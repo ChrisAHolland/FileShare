@@ -24,7 +24,7 @@ type Peer struct {
 }
 
 /*
-	A lightweight data type for the SwarmMaster to
+	A lightweight data type for the SwarmMaster and Peers to
 	hold relevant information about the Peers connected
 	to it, including their port and the files they posses.
 */
@@ -56,7 +56,6 @@ func call(rpcname string, args interface{}, reply interface{}, port string) bool
 }
 
 func serverCall(rpcname string, args interface{}, reply interface{}) bool {
-	//sockname := masterSock()
 	c, err := rpc.DialHTTP("tcp", ":3123")
 	if err != nil {
 		log.Fatal("dialing:", err)

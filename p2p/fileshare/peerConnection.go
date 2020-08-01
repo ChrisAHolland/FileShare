@@ -17,7 +17,7 @@ package fileshare
 import "fmt"
 
 /*
-	Handles incoming connection RPCs (ConnectRequest{}) from other Peers
+	Handles incoming connection RPCs (ConnectRequest{}) from other Peers.
 */
 func (p *Peer) AcceptConnect(request *ConnectRequest, reply *ConnectReply) error {
 	fmt.Printf("Peer %v: Received ConnectRequest from Peer %v\n", p.PeerID, request.PeerID)
@@ -36,7 +36,7 @@ func (p *Peer) AcceptConnect(request *ConnectRequest, reply *ConnectReply) error
 }
 
 /*
-	Connects the Peer to the provided Peer
+	Connects the Peer to the provided Peer.
 */
 func (p *Peer) ConnectPeer(port string, id int) {
 	request := ConnectRequest{}
@@ -54,7 +54,7 @@ func (p *Peer) ConnectPeer(port string, id int) {
 }
 
 /*
-	Connects the Peer to the SwarmMaster
+	Connects the Peer to the SwarmMaster.
 */
 func (p *Peer) ConnectServer() {
 	request := ConnectRequest{}

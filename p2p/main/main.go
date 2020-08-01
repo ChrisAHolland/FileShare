@@ -1,3 +1,7 @@
+/*
+	This file acts as a "test" program to simulate a FileShare network.
+*/
+
 package main
 
 import (

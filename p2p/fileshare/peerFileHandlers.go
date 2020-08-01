@@ -28,7 +28,7 @@ import (
 )
 
 /*
-	Requests a given file from a given Peer
+	Requests a given file from a given Peer.
 */
 func (p *Peer) RequestFile(port string, id int, file string) {
 	requestFileArgs := RequestFileArgs{}
@@ -47,7 +47,7 @@ func (p *Peer) RequestFile(port string, id int, file string) {
 }
 
 /*
-	Handles file request RPCs (RequestFileArgs{}) from other Peers
+	Handles file request RPCs (RequestFileArgs{}) from other Peers.
 */
 func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) error {
 	for i := 0; i <= p.numFiles; i++ {
@@ -59,9 +59,7 @@ func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) erro
 			if err != nil {
 				fmt.Printf("Error reading file: %v\n", err)
 			}
-
 			data := string(f)
-
 			reply.FileContents = data
 			reply.PeerID = request.PeerID
 			fmt.Printf("Peer %v: Served file %v to Peer %v\n", p.PeerID, request.File, request.PeerID)
@@ -77,7 +75,7 @@ func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) erro
 }
 
 /*
-	Registers a file that a Peer has on disk into the FileShare system
+	Registers a file that a Peer has on disk into the FileShare system.
 */
 func (p *Peer) RegisterFile(fileName string) error {
 	p.mu.Lock()
@@ -95,6 +93,13 @@ func (p *Peer) RegisterFile(fileName string) error {
 	return nil
 }
 
+/*
+	Asks the SwarmMaster for a particular file.
+	The SwarmMaster will search the network of Peers
+	and find the Peer with the requested file, and
+	then send the connection details back to the
+	requesting Peer.
+*/
 func (p *Peer) SearchForFile(fileName string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -113,7 +118,7 @@ func (p *Peer) SearchForFile(fileName string) error {
 }
 
 /*
-	Saves a newly received file to the Peer's directory
+	Saves a newly received file to the Peer's directory.
 */
 func saveFile(fileName string, fileContents string, id int, directory string) {
 	filePath, _ := filepath.Abs(directory + fileName)
