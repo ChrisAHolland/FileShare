@@ -1,5 +1,5 @@
 # FileShare
-FileShare is an effort to prototype a distributed, peer-to-peer file sharing (or torrenting) network. In the first phase of development for FileShare, the system was a client/server based architecture in which the Peers could send files to the SwarmMaster (server) and request files from the SwarmMaster that other Peers uploaded. In the second phase of development, and for development in the future, FileShare has moved to a peer-to-peer style architecture. 
+FileShare is an effort to prototype a distributed, peer-to-peer file sharing (or torrenting) network. The Peers are different nodes or users in the network who may wish to share files with one another, while the SwarmMaster acts almost like an indexing server, helping a Peer to join the network and find files on other Peers.  
 
 ## Contents
 This project was started as a project for CSC-462 (Distributed Systems) at UVIC.  
