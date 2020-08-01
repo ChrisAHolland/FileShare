@@ -32,7 +32,7 @@ func (m *SwarmMaster) ConnectPeer(request *ConnectRequest, reply *ConnectReply) 
 
 	reply.Accepted = true
 	reply.PeerID = request.PeerID
-	m.peers[m.numPeers].PeerId = request.PeerID
+	m.peers[m.numPeers].PeerID = request.PeerID
 	m.peers[m.numPeers].Port = request.Port
 	m.peers[m.numPeers].isConnected = true
 	m.numPeers = m.numPeers + 1
@@ -62,7 +62,7 @@ func (m *SwarmMaster) Register(request *PeerSendFile, reply *ServerReceiveFile) 
 	reply.FileName = request.FileName
 	reply.Received = true
 	for i := 0; i <= m.numPeers; i++ {
-		if m.peers[i].PeerId == request.PeerID {
+		if m.peers[i].PeerID == request.PeerID {
 			m.peers[i].numFiles++
 			m.peers[i].Files[m.peers[i].numFiles] = request.FileName
 			reply.Accepted = true
@@ -91,9 +91,9 @@ func (m *SwarmMaster) SearchFile(request *RequestFileArgs, reply *FindPeerReply)
 		for j := 0; j <= m.peers[i].numFiles; j++ {
 			if request.File == m.peers[i].Files[j] {
 				reply.Found = true
-				reply.PeerID = m.peers[i].PeerId
+				reply.PeerID = m.peers[i].PeerID
 				reply.Port = m.peers[i].Port
-				fmt.Printf("SwarmMaster: Found file %v for Peer %v on Peer %v\n", request.File, request.PeerID, m.peers[i].PeerId)
+				fmt.Printf("SwarmMaster: Found file %v for Peer %v on Peer %v\n", request.File, request.PeerID, m.peers[i].PeerID)
 				return nil
 			}
 		}

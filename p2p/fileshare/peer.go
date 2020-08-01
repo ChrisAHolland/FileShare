@@ -29,7 +29,7 @@ type Peer struct {
 	to it, including their port and the files they posses.
 */
 type PeerInfo struct {
-	PeerId      int
+	PeerID      int
 	Port        string
 	Files       [10]string
 	numFiles    int
