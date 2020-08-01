@@ -13,15 +13,14 @@ import (
 	Struct type for the Peers
 */
 type Peer struct {
-	PeerID       int
-	files        []string
-	fileContents []string
-	peers        []int
-	numFiles     int
-	numPeers     int
-	directory    string
-	Port         string
-	mu           sync.Mutex
+	PeerID    int
+	files     []string
+	peers     []int
+	numFiles  int
+	numPeers  int
+	directory string
+	Port      string
+	mu        sync.Mutex
 }
 
 /*
@@ -101,7 +100,6 @@ func MakePeer(id int, directory string, port string) *Peer {
 	p.directory = directory
 	p.files = make([]string, 10)
 	p.Port = port
-	p.fileContents = make([]string, 10)
 	p.numFiles = 0
 	p.peers = make([]int, 10)
 	p.numPeers = 0

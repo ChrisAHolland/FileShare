@@ -54,7 +54,15 @@ func (p *Peer) ServeFile(request *RequestFileArgs, reply *RequestFileReply) erro
 		if p.files[i] == request.File {
 			reply.FileExists = true
 			reply.File = p.files[i]
-			reply.FileContents = p.fileContents[i]
+
+			f, err := ioutil.ReadFile(p.directory + request.File)
+			if err != nil {
+				fmt.Printf("Error reading file: %v\n", err)
+			}
+
+			data := string(f)
+
+			reply.FileContents = data
 			reply.PeerID = request.PeerID
 			fmt.Printf("Peer %v: Served file %v to Peer %v\n", p.PeerID, request.File, request.PeerID)
 			return nil
@@ -75,15 +83,7 @@ func (p *Peer) RegisterFile(fileName string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	f, err := ioutil.ReadFile(p.directory + fileName)
-	if err != nil {
-		fmt.Printf("Error reading file: %v\n", err)
-	}
-
-	data := string(f)
-
 	p.files[p.numFiles] = fileName
-	p.fileContents[p.numFiles] = data
 	p.numFiles = p.numFiles + 1
 
 	request := PeerSendFile{}
