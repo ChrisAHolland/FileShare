@@ -1,13 +1,10 @@
 /*
 	This file contains the functions and RPC handlers for Peers to
 	connect to the SwarmMaster and to other Peers.
-
 	AcceptConnect():
 		- Handles incoming ConnectRequest RPCs from other peers.
-
 	ConnectPeer():
 		- Requests a connection with a provided Peer via a ConnectRequest RPC.
-
 	ConnectServer():
 		- Requests a connection with the SwarmMaster via a ConnectRequest RPC.
 */

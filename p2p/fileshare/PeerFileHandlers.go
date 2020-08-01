@@ -1,18 +1,14 @@
 /*
 	This file contains the functions and RPC handlers that Peers
 	use to handle files.
-
 	RequestFile():
 		- Requests a file from a Peer using a RequestFileArgs RPC.
-
 	ServeFile():
 		- Handles RequestFileArgs RPCs from Peers and returns the requested
 		  file (if possible) to the requesting Peer using a RequestFileReply RPC.
-
 	RegisterFile():
 		- Peers use this function to register a file in the system. This means
 		  to make the file publicly shareable with other peers.
-
 	saveFile():
 		- Private function that Peers use to save a file to 'disk' once obtained from
 		  another Peer.
