@@ -1,22 +1,31 @@
 # FileShare
-Prototyping a distributed, peer-to-peer file sharing network.
+FileShare is an effort to prototype a distributed, peer-to-peer file sharing (or torrenting) network. In the first phase of development for FileShare, the system was a client/server based architecture in which the Peers could send files to the SwarmMaster (server) and request files from the SwarmMaster that other Peers uploaded. In the second phase of development, and for development in the future, FileShare has moved to a peer-to-peer style architecture. 
 
 ## Contents
 This project was started as a project for CSC-462 (Distributed Systems) at UVIC.  
-* `src/`: Contains the code for FileShare, a peer-to-peer distributed file sharing system.  
-
-## Client/Server System Architecture
-The initial prototype of the system is a client/server architecture in which Peers can send and receive files to/from the Server (SwarmMaster) as demonstrated below:  
-
-![](images/FileShare-CS.png)  
-
-A typical use case scenario of the client/server FileShare system is demonstrated in the behaviour diagram below:  
-
-![](images/FileShare-Behaviour-Diagram.png)  
+* `src/`: Contains the code for FileShare, a peer-to-peer distributed file sharing system.
+    * `fileshare/`: Contains the Peer and SwarmMaster code, all part of the `fileshare` package.  
+    * `labgob/`: Code provided for course labs. Wrapper for the `encoding/gob` package.  
+    * `labrpc/`: Code provided for course labs. Simple RPC framework.  
+    * `main/`: Contains `main.go` and Peer directories, used for running a test case of the FileShare system.  
+* `images/`: Contains architecture related images for the documentation.   
 
 ## Peer-to-peer System Architecture
-I am currently working on making FileShare a distributed, peer-to-peer system. Initially, I plan to have it's system architecture similar to what the below diagram represents:  
+FileShare is a distributed, client/server + peer-to-peer file sharing network (think BitTorrent, Gnutell, or Napster). A high level architecture diagram can be seen below:  
 
 ![](images/FileShare-P2P.png)  
 
-There is more to come for this part of the project!
+## Data flow and Behaviour Diagrams
+All components of FileShare (Peers and the SwarmMaster) communicate using Remote Procedure Calls (RPC) over a TCP connection. Below you will find behaviour diagrams for the main functionalities of the system.  
+
+### Peer Connecting to SwarmMaster
+![](images/peer-connect-server.png)
+
+### Peer Connecting to Peer
+![](images/peer-connect-peer.png)
+
+### Registering a File
+![](images/register-file.png)
+
+### Searching for a File
+![](images/search-for-file.png)
