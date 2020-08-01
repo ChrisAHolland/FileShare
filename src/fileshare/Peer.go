@@ -10,7 +10,7 @@ import (
 )
 
 /*
-	Struct type for the Peers
+	Struct type for the Peers.
 */
 type Peer struct {
 	PeerID    int
@@ -38,7 +38,7 @@ type PeerInfo struct {
 
 /*
 	Method used to make Remote Procedure Calls (RPCs)
-	Adopted from provided lab code
+	Adopted from provided lab code.
 */
 func call(rpcname string, args interface{}, reply interface{}, port string) bool {
 	c, err := rpc.DialHTTP("tcp", port)
@@ -55,6 +55,9 @@ func call(rpcname string, args interface{}, reply interface{}, port string) bool
 	return false
 }
 
+/*
+	Method for the Peers to make RPC calls to the SwarmMaster.
+*/
 func serverCall(rpcname string, args interface{}, reply interface{}) bool {
 	c, err := rpc.DialHTTP("tcp", ":3123")
 	if err != nil {
@@ -71,7 +74,7 @@ func serverCall(rpcname string, args interface{}, reply interface{}) bool {
 }
 
 /*
-	Creates a server for the Peer so that other Peers can connect
+	Creates a server for the Peer so that other Peers can connect.
 */
 func (p *Peer) peerServer(port string) {
 	rpc.Register(p)
@@ -90,7 +93,7 @@ func (p *Peer) peerServer(port string) {
 }
 
 /*
-	Method called to create a new Peer
+	Method called to create a new Peer.
 */
 func MakePeer(id int, directory string, port string) *Peer {
 	p := Peer{}

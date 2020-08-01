@@ -103,7 +103,7 @@ func (m *SwarmMaster) SearchFile(request *RequestFileArgs, reply *FindPeerReply)
 }
 
 /*
-	Starts a SwarmMaster's server
+	Starts a SwarmMaster's server.
 */
 func (m *SwarmMaster) server() {
 	rpc.Register(m)
@@ -117,8 +117,7 @@ func (m *SwarmMaster) server() {
 }
 
 /*
-	Creates a SwarmMaster
-	Called in main.go
+	Creates a new SwarmMaster.
 */
 func MakeSwarmMaster() *SwarmMaster {
 	m := SwarmMaster{}
