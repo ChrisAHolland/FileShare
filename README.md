@@ -19,13 +19,21 @@ FileShare is a distributed, client/server + peer-to-peer file sharing network (t
 All components of FileShare (Peers and the SwarmMaster) communicate using Remote Procedure Calls (RPC) over a TCP connection. Below you will find behaviour diagrams for the main functionalities of the system.  
 
 ### Peer Connecting to SwarmMaster
+A Peer must connect to the SwarmMaster so that it can receive the connection information of the other Peers which may possess the files it wants. It is to be expected that the SwarmMaster’s connection details (e.g. IP, port) are public so that the Peer may connect, whereas the Peer’s connection details are protected (as they are behind NATs) but are obtainable through the SwarmMaster.  
+
 ![](images/peer-connect-server.png)
 
 ### Peer Connecting to Peer
+The process of a Peer connecting to another Peer is nearly identical to the process of a Peer connecting to the SwarmMaster discussed in Section 3.1. The main difference is that the Peer initiating the connection must firstly obtain the connection information of the Peer it would like to connect to. The connecting Peer may obtain this from the SwarmMaster, or via external programming logic.  
+
 ![](images/peer-connect-peer.png)
 
 ### Registering a File
+When a Peer registers a file it makes the SwarmMaster aware that it is now making that file public for sharing with other Peers.  
+
 ![](images/register-file.png)
 
 ### Searching for a File
+If a Peer would like to download a particular file, but is unaware (or the programming logic using FileShare is unaware) of the whereabouts of the file, it can ask the SwarmMaster to search it’s index for the Peer that has registered the particular file. It will then give the requesting Peer the connection details of the Peer with the file it desires.
+
 ![](images/search-for-file.png)
