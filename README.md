@@ -33,6 +33,11 @@ When a Peer registers a file it makes the SwarmMaster aware that it is now makin
 
 ![](images/register-file.png)
 
+### Requesting a File
+A Peer can directly request a file from another Peer if the programming logic using FileShare needs it to do so.  
+
+![](images/request-file.png)
+
 ### Searching for a File
 If a Peer would like to download a particular file, but is unaware (or the programming logic using FileShare is unaware) of the whereabouts of the file, it can ask the SwarmMaster to search it’s index for the Peer that has registered the particular file. It will then give the requesting Peer the connection details of the Peer with the file it desires.
 
